@@ -72,7 +72,6 @@ def update(disp_):
 	else:
 		disp_ = buffer_[dstart_:dstart_ + nrows_]
 	
-	print(disp_)
 	cv2.imshow(name_, disp_)
 
 

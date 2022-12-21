@@ -70,7 +70,6 @@ def setRegularizer():
 	global backim_
 	global gain_
 
-	print(amat_)
 	xdim = amat_.shape[1]
 	bmat = np.zeros((xdim-1, xdim), dtype=np.float64)
 
@@ -107,12 +106,13 @@ def setAmat():
 	thetas = np.zeros((1, nangles_), dtype=np.float32)
 	tcur = theta_start_
 	for i in range(nangles_):
-		thetas[0, i] = tcur; tcur += tdelta
+		thetas[0, i] = tcur
+		tcur += tdelta
 
 	amat_ = np.zeros((nobs, nangles_ + 1), dtype=np.float64)
 	for i in range(nobs):
 		angle = tq_[i, 0]
-		mask = ((angle - thetas) * tdir >= 0) / 255
+		mask = ((angle - thetas) * tdir >= 0)
 		# find the idx of the last theta we can see at this angle
 		idx = int(np.sum(mask) - 1)
 		if (idx < 0): # doesn't see any of the scene
@@ -122,7 +122,7 @@ def setAmat():
 			for j in range(idx + 1):
 				amat_[i, j] = 1
 			amat_[i, idx+1] = 0.5 * (2 - diff) * diff + 0.5
-			if (idx < nangles_):
+			if (idx < nangles_ - 1):
 				amat_[i, idx+2] = 0.5 * diff * diff
 
 def setPieSliceXYLocs():
@@ -232,6 +232,9 @@ def setObsRegion(corner, wallpt, endpt):
 	wall_angle = np.fmod(wall_angle + 2 * np.pi, 2 * np.pi)
 	end_angle = np.fmod(end_angle + 2 * np.pi, 2 * np.pi)
 
+	# wall_angle = np.degrees(wall_angle)
+	# end_angle = np.degrees(end_angle)
+
 	diff_angle = end_angle - wall_angle
 	angle_dir = diff_angle / abs(diff_angle)
 	print(f'selected point on wall at angle {wall_angle}')
@@ -283,7 +286,7 @@ def findObsRegion(frame_):
 			xy_click = np.float32([x_click, y_click])
 			xy_click = xy_click.reshape(-1, 1, 2)
 			#print(xy_click)
-			I = cv2.cvtColor(frame_, cv2.COLOR_BGR2GRAY)
+			I = cv2.cvtColor(frame_, cv2.COLOR_RGB2GRAY)
 			refined_xy = cv2.cornerSubPix(I, xy_click, (11, 11), (-1, -1), criteria)
 			#print(refined_xy)
 			X_CAPT = np.append(X_CAPT, refined_xy[0, 0, 0])
@@ -404,6 +407,7 @@ def plotObsXYLocs(name):
 
 	cv2.namedWindow(name, cv2.WINDOW_NORMAL)
 	sample = np.copy(dframe_)
+	sample = cv2.cvtColor(sample, cv2.COLOR_BGR2RGB)
 	cv2.imshow(name, sample)
 
 	cv2.circle(sample, (int((corner_x_ - xmin_) / (1 << downlevs_)), int((corner_y_ - ymin_) / (1 << downlevs_))), 1, (255,0,0))

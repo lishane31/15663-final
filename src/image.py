@@ -110,7 +110,8 @@ def processVideo(
 		cv2.imshow("background image", inference.backim_ / 255)
 
 		rd.update(cur_disp)
-		outputImage[i, :, :] = cur_disp[0, :, :]
+		
+		outputImage[i, :, :] = (cur_disp[0, :, :] - np.min(cur_disp[0, :, :])) / (np.max(cur_disp[0, :, :]) - np.min(cur_disp[0, :, :]))
 
 		if (cv2.waitKey(1) == 27):
 			print("pressed ESC key, exiting inference")
@@ -124,5 +125,5 @@ def processVideo(
 
 
 if __name__ == '__main__':
-    processVideo("indoors/loc1_one_person_walking.MOV", False, 2, 20, 26)
+    processVideo("outdoors/concrete_one_person_walking_circles.MP4", False, 2, 20, 26)
 	
